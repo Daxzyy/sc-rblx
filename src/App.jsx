@@ -1,16 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 
-// ---------------------------------------------------------------------------
-// API CONFIG
-// This calls our own serverless function at /api/search, which does the
-// pagination server-side. Set the real upstream URL via the SCRIPT_API_URL
-// environment variable in Vercel — no code changes needed.
-// ---------------------------------------------------------------------------
 const API_BASE_URL = '/api/search';
 
-// ---------------------------------------------------------------------------
-// Inline icons
-// ---------------------------------------------------------------------------
 function ChevronAccent({ className }) {
   return (
     <svg className={className} width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -66,9 +57,6 @@ function CheckGlyph() {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Snippet card
-// ---------------------------------------------------------------------------
 function SnippetCard({ title, code }) {
   const [copied, setCopied] = useState(false);
   const timeoutRef = useRef(null);
@@ -77,7 +65,6 @@ function SnippetCard({ title, code }) {
     try {
       await navigator.clipboard.writeText(code);
     } catch {
-      // Fallback for environments without clipboard API access
       const textarea = document.createElement('textarea');
       textarea.value = code;
       textarea.style.position = 'fixed';
@@ -116,13 +103,10 @@ function SnippetCard({ title, code }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// App
-// ---------------------------------------------------------------------------
 export default function App() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
-  const [status, setStatus] = useState('idle'); // idle | loading | success | error
+  const [status, setStatus] = useState('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
 
@@ -204,10 +188,6 @@ export default function App() {
                 aria-label="Cari snippet"
               />
             </div>
-            <button type="submit" style={styles.searchButton}>
-              Cari
-              <ChevronAccent />
-            </button>
           </form>
         </section>
 
@@ -224,7 +204,7 @@ export default function App() {
             <div style={styles.errorBox}>
               <p style={{ margin: 0 }}>{errorMessage}</p>
               <p style={{ margin: '6px 0 0', color: 'var(--light-text)', fontSize: 13 }}>
-                Pastikan endpoint API di <code>API_BASE_URL</code> (src/App.jsx) sudah diarahkan ke backend kamu.
+                Pastikan environment variable SCRIPT_API_URL sudah diisi di Vercel.
               </p>
             </div>
           )}
@@ -247,21 +227,38 @@ export default function App() {
 
       <footer style={styles.footer}>
         <AngledDivider />
-        <p style={styles.footerText}>Script — kumpulan snippet, siap pakai.</p>
+        <div style={styles.footerContent}>
+          <div style={styles.footerBrand}>
+            <div style={styles.footerBadge}>
+              <svg width="18" height="18" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="19" y="17" width="26" height="3" fill="#F2F2F2" />
+                <rect x="19" y="30.5" width="26" height="3" fill="#F2F2F2" />
+                <rect x="19" y="44" width="18" height="3" fill="#F2F2F2" />
+              </svg>
+            </div>
+            <span style={styles.footerBrandText}>SCRIPT</span>
+          </div>
+          <nav style={styles.footerNav}>
+            <a href="#" style={styles.footerLink}>Tentang</a>
+            <a href="#" style={styles.footerLink}>Kontribusi</a>
+            <a href="#" style={styles.footerLink}>Kontak</a>
+          </nav>
+        </div>
+        <p style={styles.footerCopyright}>
+          © {new Date().getFullYear()} Script — kumpulan snippet, siap pakai.
+        </p>
       </footer>
     </div>
   );
 }
 
-// ---------------------------------------------------------------------------
-// Styles
-// ---------------------------------------------------------------------------
 const styles = {
   page: {
     minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
     background: 'var(--background)',
+    paddingBottom: 120,
   },
   header: {
     padding: '20px 24px',
@@ -337,24 +334,6 @@ const styles = {
     padding: '14px 16px 14px 46px',
     outline: 'none',
   },
-  searchButton: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: 8,
-    justifyContent: 'center',
-    background: 'var(--gold)',
-    color: '#221a00',
-    border: 'none',
-    borderRadius: 4,
-    fontFamily: 'var(--font-family)',
-    fontWeight: 700,
-    fontSize: 14,
-    letterSpacing: '0.06em',
-    textTransform: 'uppercase',
-    padding: '0 22px',
-    cursor: 'pointer',
-    transition: 'background 0.15s ease',
-  },
   statusText: {
     color: 'var(--light-text)',
     fontSize: 14,
@@ -427,16 +406,62 @@ const styles = {
     whiteSpace: 'pre',
   },
   footer: {
-    padding: '24px 24px 32px',
+    position: 'fixed',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    background: 'var(--panel-bg)',
+    borderTop: '1px solid var(--border-subtle)',
+    padding: '18px 24px 20px',
+    zIndex: 10,
+  },
+  footerContent: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: 16,
     maxWidth: 860,
     margin: '0 auto',
-    width: '100%',
   },
-  footerText: {
-    marginTop: 14,
+  footerBrand: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+  },
+  footerBadge: {
+    width: 30,
+    height: 30,
+    borderRadius: '50%',
+    background: '#373F4B',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  footerBrandText: {
+    fontFamily: 'var(--font-family)',
+    fontWeight: 700,
+    fontSize: 15,
+    letterSpacing: '0.1em',
+    color: 'var(--gold-text)',
+  },
+  footerNav: {
+    display: 'flex',
+    gap: 20,
+    flexWrap: 'wrap',
+  },
+  footerLink: {
+    fontSize: 13,
+    letterSpacing: '0.03em',
+    color: 'var(--light-text)',
+  },
+  footerCopyright: {
+    marginTop: 10,
+    maxWidth: 860,
+    margin: '10px auto 0',
     fontSize: 12,
-    letterSpacing: '0.08em',
-    textTransform: 'uppercase',
+    letterSpacing: '0.04em',
     color: 'var(--border-subtle)',
   },
 };
