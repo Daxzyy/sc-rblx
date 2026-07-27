@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 
 const API_BASE_URL = '/api/search';
+const LOCAL_SCRIPTS_URL = '/sc.json';
 const DEBOUNCE_MS = 400;
 
 function ChevronAccent({ className }) {
@@ -123,6 +124,37 @@ function SnippetCard({ title, code }) {
   );
 }
 
+function mergeResults(apiItems, localItems) {
+  const seen = new Set();
+  const combined = [];
+
+  for (const item of apiItems) {
+    const key = item.title.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    combined.push(item);
+  }
+
+  for (const item of localItems) {
+    const key = item.title.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    combined.push(item);
+  }
+
+  return combined;
+}
+
+function sortByExactMatch(items, lowerQuery) {
+  return [...items].sort((a, b) => {
+    const aExact = a.title.toLowerCase() === lowerQuery;
+    const bExact = b.title.toLowerCase() === lowerQuery;
+    if (aExact && !bExact) return -1;
+    if (!aExact && bExact) return 1;
+    return 0;
+  });
+}
+
 export default function App() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
@@ -133,6 +165,24 @@ export default function App() {
   const abortRef = useRef(null);
   const inputRef = useRef(null);
   const audioRef = useRef(null);
+  const localScriptsRef = useRef(null);
+
+  const loadLocalScripts = useCallback(async () => {
+    if (localScriptsRef.current) return localScriptsRef.current;
+
+    try {
+      const response = await fetch(LOCAL_SCRIPTS_URL, {
+        headers: { Accept: 'application/json' },
+      });
+      if (!response.ok) throw new Error('sc.json tidak ditemukan');
+      const data = await response.json();
+      localScriptsRef.current = Array.isArray(data) ? data : [];
+    } catch {
+      localScriptsRef.current = [];
+    }
+
+    return localScriptsRef.current;
+  }, []);
 
   const runSearch = useCallback(async (q) => {
     const trimmed = q.trim();
@@ -154,6 +204,16 @@ export default function App() {
     setErrorMessage('');
     setHasSearched(true);
 
+    const lowerQuery = trimmed.toLowerCase();
+    const localScripts = await loadLocalScripts();
+    const localMatches = localScripts
+      .filter((item) => (item.title || '').toLowerCase().includes(lowerQuery))
+      .map((item, index) => ({
+        id: `local-${index}-${item.title ?? 'untitled'}`,
+        title: item.title ?? 'Tanpa judul',
+        code: item.script ?? '',
+      }));
+
     try {
       const url = new URL(API_BASE_URL, window.location.origin);
       url.searchParams.set('q', trimmed);
@@ -169,30 +229,29 @@ export default function App() {
 
       const data = await response.json();
       const scripts = data?.result?.scripts ?? [];
-      const mapped = scripts.map((item, index) => ({
-        id: `${index}-${item.title ?? 'untitled'}`,
+      const apiMatches = scripts.map((item, index) => ({
+        id: `api-${index}-${item.title ?? 'untitled'}`,
         title: item.title ?? 'Tanpa judul',
         code: item.script ?? '',
       }));
 
-      const lowerQuery = trimmed.toLowerCase();
-      mapped.sort((a, b) => {
-        const aExact = a.title.toLowerCase() === lowerQuery;
-        const bExact = b.title.toLowerCase() === lowerQuery;
-        if (aExact && !bExact) return -1;
-        if (!aExact && bExact) return 1;
-        return 0;
-      });
-
-      setResults(mapped);
+      const combined = sortByExactMatch(mergeResults(apiMatches, localMatches), lowerQuery);
+      setResults(combined);
       setStatus('success');
     } catch (err) {
       if (err.name === 'AbortError') return;
+
+      if (localMatches.length > 0) {
+        setResults(sortByExactMatch(localMatches, lowerQuery));
+        setStatus('success');
+        return;
+      }
+
       setStatus('error');
       setErrorMessage(err.message || 'Terjadi kesalahan saat mencari.');
       setResults([]);
     }
-  }, []);
+  }, [loadLocalScripts]);
 
   useEffect(() => {
     clearTimeout(debounceRef.current);
