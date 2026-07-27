@@ -1,0 +1,6 @@
+[
+  {
+    "title": "Bladex Hub",
+    "script": "loadstring(game:HttpGet("https://pastefy.app/0Ho5kh5h/raw"))()"
+  }
+]
