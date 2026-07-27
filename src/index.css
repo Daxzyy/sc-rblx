@@ -41,6 +41,7 @@
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html, body {
@@ -59,12 +60,25 @@ body {
   min-height: 100vh;
 }
 
+a {
+  color: var(--gold-text);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--gold-hover);
+}
+
+::selection {
+  background: var(--gold);
+  color: #221a00;
+}
+
 :focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 2px;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
