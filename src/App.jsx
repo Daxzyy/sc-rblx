@@ -21,6 +21,16 @@ function AngledDivider({ width = '100%' }) {
   );
 }
 
+function AngledDividerDouble({ width = '100%' }) {
+  return (
+    <svg width={width} height="5" viewBox="0 0 560 5" preserveAspectRatio="none" aria-hidden="true" style={{ display: 'block' }}>
+      <path d="M0 4H560" stroke="var(--gold)" strokeMiterlimit="10" />
+      <path d="M430 0H560V4H420L424.76 1.20615C425.66 0.429117 426.81 0.000859238 430 0Z" fill="var(--gold)" />
+      <path d="M130 0H0V4H140L135.24 1.20615C134.34 0.429117 133.19 0.000859238 130 0Z" fill="var(--gold)" />
+    </svg>
+  );
+}
+
 function TitleUnderline({ width = 73 }) {
   return (
     <svg width={width} height="4" viewBox="0 0 73 4" preserveAspectRatio="none" fill="none" aria-hidden="true">
@@ -248,7 +258,7 @@ export default function App() {
 
       <footer style={styles.footer}>
         <div style={styles.footerDivider}>
-          <AngledDivider />
+          <AngledDividerDouble />
         </div>
         <p style={styles.footerText}>
           Script Code <span style={styles.footerDash}>-</span>{' '}
