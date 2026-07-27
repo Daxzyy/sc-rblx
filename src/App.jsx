@@ -247,26 +247,19 @@ export default function App() {
       </main>
 
       <footer style={styles.footer}>
-        <AngledDivider />
-        <div style={styles.footerContent}>
-          <div style={styles.footerBrand}>
-            <div style={styles.footerBadge}>
-              <svg width="18" height="18" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <rect x="19" y="17" width="26" height="3" fill="#F2F2F2" />
-                <rect x="19" y="30.5" width="26" height="3" fill="#F2F2F2" />
-                <rect x="19" y="44" width="18" height="3" fill="#F2F2F2" />
-              </svg>
-            </div>
-            <span style={styles.footerBrandText}>SCRIPT</span>
-          </div>
-          <nav style={styles.footerNav}>
-            <a href="#" style={styles.footerLink}>Tentang</a>
-            <a href="#" style={styles.footerLink}>Kontribusi</a>
-            <a href="#" style={styles.footerLink}>Kontak</a>
-          </nav>
+        <div style={styles.footerDivider}>
+          <AngledDivider />
         </div>
-        <p style={styles.footerCopyright}>
-          © {new Date().getFullYear()} Script — kumpulan snippet, siap pakai.
+        <p style={styles.footerText}>
+          Script Code <span style={styles.footerDash}>-</span>{' '}
+          
+            href="https://wa.me/+62895423300395?text=halo+givy+ganteng"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={styles.footerHandle}
+          >
+            @givy
+          </a>
         </p>
       </footer>
     </div>
@@ -432,56 +425,25 @@ const styles = {
     left: 0,
     right: 0,
     background: 'var(--panel-bg)',
-    borderTop: '1px solid var(--border-subtle)',
-    padding: '18px 24px 20px',
     zIndex: 10,
+    textAlign: 'center',
+    padding: '18px 24px 22px',
   },
-  footerContent: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    gap: 16,
-    maxWidth: 860,
-    margin: '0 auto',
+  footerDivider: {
+    marginBottom: 18,
   },
-  footerBrand: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 10,
-  },
-  footerBadge: {
-    width: 30,
-    height: 30,
-    borderRadius: '50%',
-    background: '#373F4B',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  footerBrandText: {
-    fontFamily: 'var(--font-family)',
-    fontWeight: 700,
+  footerText: {
+    margin: 0,
     fontSize: 15,
-    letterSpacing: '0.1em',
-    color: 'var(--gold-text)',
-  },
-  footerNav: {
-    display: 'flex',
-    gap: 20,
-    flexWrap: 'wrap',
-  },
-  footerLink: {
-    fontSize: 13,
-    letterSpacing: '0.03em',
+    fontWeight: 500,
+    letterSpacing: '0.01em',
     color: 'var(--light-text)',
   },
-  footerCopyright: {
-    maxWidth: 860,
-    margin: '10px auto 0',
-    fontSize: 12,
-    letterSpacing: '0.04em',
+  footerDash: {
     color: 'var(--border-subtle)',
+    margin: '0 2px',
+  },
+  footerHandle: {
+    color: 'var(--gold-text)',
   },
 };
