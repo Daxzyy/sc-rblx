@@ -253,7 +253,7 @@ export default function App() {
         <p style={styles.footerText}>
           Script Code <span style={styles.footerDash}>-</span>{' '}
           
-            href="https://wa.me/+62895423300395?text=halo+givy+ganteng"
+            <a href="https://wa.me/+62895423300395?text=halo+givy+ganteng"
             target="_blank"
             rel="noopener noreferrer"
             style={styles.footerHandle}
