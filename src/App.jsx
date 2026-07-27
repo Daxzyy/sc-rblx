@@ -240,11 +240,7 @@ export default function App() {
       <header style={styles.header}>
         <div style={styles.brandRow}>
           <div style={styles.badge}>
-            <svg width="20" height="20" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-              <rect x="19" y="17" width="26" height="3" fill="#F2F2F2" />
-              <rect x="19" y="30.5" width="26" height="3" fill="#F2F2F2" />
-              <rect x="19" y="44" width="18" height="3" fill="#F2F2F2" />
-            </svg>
+            <img src="/logo.jpg" alt="Script Gobloks logo" style={styles.badgeImage} />
           </div>
           <span style={styles.brandText}>SCRIPT GOBLOX</span>
         </div>
@@ -252,7 +248,7 @@ export default function App() {
 
       <main style={styles.main}>
         <section style={styles.hero}>
-          <h1 style={styles.heroTitle}>Cari snippet, salin, jalan.</h1>
+          <h1 style={styles.heroTitle}>Cari scriptnya, copy, gasskeun😈😋</h1>
           <div style={{ marginTop: 10, marginBottom: 22 }}>
             <TitleUnderline width={96} />
           </div>
@@ -267,7 +263,7 @@ export default function App() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Ketik judul snippet..."
+                placeholder="Ketik aja wok..."
                 style={styles.searchInput}
                 aria-label="Cari snippet"
               />
@@ -291,7 +287,7 @@ export default function App() {
 
         <section aria-live="polite">
           {status === 'loading' && (
-            <p style={styles.statusText}>Mencari snippet...</p>
+            <p style={styles.statusText}>Mencari script...</p>
           )}
 
           {status === 'error' && (
@@ -308,7 +304,7 @@ export default function App() {
           )}
 
           {!hasSearched && status !== 'loading' && (
-            <p style={styles.statusText}>Mulai ketik query buat nampilin snippet di sini.</p>
+            <p style={styles.statusText}>Mulai ketik mapnya buat nampilin sc nya😎</p>
           )}
 
           <div style={styles.resultsList}>
@@ -324,14 +320,14 @@ export default function App() {
           <AngledDividerDouble />
         </div>
         <p style={styles.footerText}>
-          Script Code <span style={styles.footerDash}>-</span>{' '}
+          Script Goblox <span style={styles.footerDash}>-</span>{' '}
           
             <a href="https://wa.me/+62895423300395?text=halo+givy+ganteng"
             target="_blank"
             rel="noopener noreferrer"
             style={styles.footerHandle}
           >
-            @givy
+            @givyXfhan
           </a>
         </p>
       </footer>
@@ -361,12 +357,20 @@ const styles = {
   badge: {
     width: 36,
     height: 36,
-    borderRadius: '50%',
+    borderRadius: 6,
     background: '#373F4B',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
+    overflow: 'hidden',
+    border: '1px solid var(--border-subtle)',
+  },
+  badgeImage: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    display: 'block',
   },
   brandText: {
     fontFamily: 'var(--font-family)',
