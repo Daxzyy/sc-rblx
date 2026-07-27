@@ -161,6 +161,9 @@ export default function App() {
   const [status, setStatus] = useState('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const debounceRef = useRef(null);
   const abortRef = useRef(null);
   const inputRef = useRef(null);
@@ -177,7 +180,8 @@ export default function App() {
       if (!response.ok) throw new Error('sc.json tidak ditemukan');
       const data = await response.json();
       localScriptsRef.current = Array.isArray(data) ? data : [];
-    } catch {
+    } catch (err) {
+      console.error('Gagal membaca public/sc.json, cek format JSON-nya:', err);
       localScriptsRef.current = [];
     }
 
@@ -203,6 +207,8 @@ export default function App() {
     setStatus('loading');
     setErrorMessage('');
     setHasSearched(true);
+    setPage(1);
+    setHasMore(false);
 
     const lowerQuery = trimmed.toLowerCase();
     const localScripts = await loadLocalScripts();
@@ -217,6 +223,7 @@ export default function App() {
     try {
       const url = new URL(API_BASE_URL, window.location.origin);
       url.searchParams.set('q', trimmed);
+      url.searchParams.set('page', '1');
 
       const response = await fetch(url.toString(), {
         headers: { Accept: 'application/json' },
@@ -230,7 +237,7 @@ export default function App() {
       const data = await response.json();
       const scripts = data?.result?.scripts ?? [];
       const apiMatches = scripts.map((item, index) => ({
-        id: `api-${index}-${item.title ?? 'untitled'}`,
+        id: `api-1-${index}-${item.title ?? 'untitled'}`,
         title: item.title ?? 'Tanpa judul',
         code: item.script ?? '',
       }));
@@ -238,20 +245,61 @@ export default function App() {
       const combined = sortByExactMatch(mergeResults(apiMatches, localMatches), lowerQuery);
       setResults(combined);
       setStatus('success');
+      setHasMore(Boolean(data.hasMore));
     } catch (err) {
       if (err.name === 'AbortError') return;
 
       if (localMatches.length > 0) {
         setResults(sortByExactMatch(localMatches, lowerQuery));
         setStatus('success');
+        setHasMore(false);
         return;
       }
 
       setStatus('error');
       setErrorMessage(err.message || 'Terjadi kesalahan saat mencari.');
       setResults([]);
+      setHasMore(false);
     }
   }, [loadLocalScripts]);
+
+  const loadMore = useCallback(async () => {
+    const trimmed = query.trim();
+    if (!trimmed || isLoadingMore) return;
+
+    const nextPage = page + 1;
+    setIsLoadingMore(true);
+
+    try {
+      const url = new URL(API_BASE_URL, window.location.origin);
+      url.searchParams.set('q', trimmed);
+      url.searchParams.set('page', String(nextPage));
+
+      const response = await fetch(url.toString(), {
+        headers: { Accept: 'application/json' },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Permintaan gagal (${response.status})`);
+      }
+
+      const data = await response.json();
+      const scripts = data?.result?.scripts ?? [];
+      const newItems = scripts.map((item, index) => ({
+        id: `api-${nextPage}-${index}-${item.title ?? 'untitled'}`,
+        title: item.title ?? 'Tanpa judul',
+        code: item.script ?? '',
+      }));
+
+      setResults((prev) => mergeResults(prev, newItems));
+      setPage(nextPage);
+      setHasMore(Boolean(data.hasMore));
+    } catch (err) {
+      setHasMore(false);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [query, page, isLoadingMore]);
 
   useEffect(() => {
     clearTimeout(debounceRef.current);
@@ -377,6 +425,17 @@ export default function App() {
               <SnippetCard key={item.id} title={item.title} code={item.code} />
             ))}
           </div>
+
+          {hasMore && (
+            <button
+              type="button"
+              onClick={loadMore}
+              disabled={isLoadingMore}
+              style={styles.loadMoreButton}
+            >
+              {isLoadingMore ? 'Memuat...' : 'Load More'}
+            </button>
+          )}
         </section>
       </main>
 
@@ -532,6 +591,18 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: 18,
+  },
+  loadMoreButton: {
+    display: 'block',
+    margin: '22px auto 0',
+    background: 'transparent',
+    border: '1px solid var(--border-subtle)',
+    color: 'var(--gold-text)',
+    borderRadius: 4,
+    fontSize: 14,
+    fontFamily: 'var(--font-family)',
+    padding: '10px 28px',
+    cursor: 'pointer',
   },
   card: {
     background: 'var(--panel-bg)',
