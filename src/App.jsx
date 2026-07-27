@@ -158,13 +158,22 @@ export default function App() {
 
       const data = await response.json();
       const scripts = data?.result?.scripts ?? [];
-      setResults(
-        scripts.map((item, index) => ({
-          id: `${index}-${item.title ?? 'untitled'}`,
-          title: item.title ?? 'Tanpa judul',
-          code: item.script ?? '',
-        }))
-      );
+      const mapped = scripts.map((item, index) => ({
+        id: `${index}-${item.title ?? 'untitled'}`,
+        title: item.title ?? 'Tanpa judul',
+        code: item.script ?? '',
+      }));
+
+      const lowerQuery = trimmed.toLowerCase();
+      mapped.sort((a, b) => {
+        const aExact = a.title.toLowerCase() === lowerQuery;
+        const bExact = b.title.toLowerCase() === lowerQuery;
+        if (aExact && !bExact) return -1;
+        if (!aExact && bExact) return 1;
+        return 0;
+      });
+
+      setResults(mapped);
       setStatus('success');
     } catch (err) {
       if (err.name === 'AbortError') return;
@@ -194,7 +203,7 @@ export default function App() {
               <rect x="19" y="44" width="18" height="3" fill="#F2F2F2" />
             </svg>
           </div>
-          <span style={styles.brandText}>SCRIPT</span>
+          <span style={styles.brandText}>SCRIPT GOBLOX</span>
         </div>
       </header>
 
@@ -282,7 +291,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     background: 'var(--background)',
-    paddingBottom: 120,
+    paddingBottom: 80,
   },
   header: {
     padding: '20px 24px',
@@ -437,14 +446,14 @@ const styles = {
     background: 'var(--panel-bg)',
     zIndex: 10,
     textAlign: 'center',
-    padding: '18px 24px 22px',
+    padding: '12px 24px 14px',
   },
   footerDivider: {
-    marginBottom: 18,
+    marginBottom: 10,
   },
   footerText: {
     margin: 0,
-    fontSize: 15,
+    fontSize: 11,
     fontWeight: 500,
     letterSpacing: '0.01em',
     color: 'var(--light-text)',
