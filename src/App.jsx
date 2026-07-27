@@ -1,6 +1,7 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 const API_BASE_URL = '/api/search';
+const DEBOUNCE_MS = 400;
 
 function ChevronAccent({ className }) {
   return (
@@ -109,10 +110,24 @@ export default function App() {
   const [status, setStatus] = useState('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
+  const debounceRef = useRef(null);
+  const abortRef = useRef(null);
 
   const runSearch = useCallback(async (q) => {
     const trimmed = q.trim();
-    if (!trimmed) return;
+
+    if (!trimmed) {
+      setStatus('idle');
+      setResults([]);
+      setHasSearched(false);
+      return;
+    }
+
+    if (abortRef.current) {
+      abortRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     setStatus('loading');
     setErrorMessage('');
@@ -124,6 +139,7 @@ export default function App() {
 
       const response = await fetch(url.toString(), {
         headers: { Accept: 'application/json' },
+        signal: controller.signal,
       });
 
       if (!response.ok) {
@@ -141,16 +157,21 @@ export default function App() {
       );
       setStatus('success');
     } catch (err) {
+      if (err.name === 'AbortError') return;
       setStatus('error');
       setErrorMessage(err.message || 'Terjadi kesalahan saat mencari.');
       setResults([]);
     }
   }, []);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    runSearch(query);
-  };
+  useEffect(() => {
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      runSearch(query);
+    }, DEBOUNCE_MS);
+
+    return () => clearTimeout(debounceRef.current);
+  }, [query, runSearch]);
 
   return (
     <div style={styles.page}>
@@ -174,7 +195,7 @@ export default function App() {
             <TitleUnderline width={96} />
           </div>
 
-          <form onSubmit={handleSubmit} style={styles.searchRow}>
+          <div style={styles.searchRow}>
             <div style={styles.searchInputWrap}>
               <span style={styles.searchIcon}>
                 <SearchGlyph />
@@ -183,12 +204,12 @@ export default function App() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Ketik judul snippet lalu tekan Enter..."
+                placeholder="Ketik judul snippet..."
                 style={styles.searchInput}
                 aria-label="Cari snippet"
               />
             </div>
-          </form>
+          </div>
         </section>
 
         <div style={{ margin: '28px 0' }}>
@@ -457,7 +478,6 @@ const styles = {
     color: 'var(--light-text)',
   },
   footerCopyright: {
-    marginTop: 10,
     maxWidth: 860,
     margin: '10px auto 0',
     fontSize: 12,
