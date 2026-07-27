@@ -60,6 +60,15 @@ function CopyGlyph() {
   );
 }
 
+function ClearGlyph() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
 function CheckGlyph() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -122,6 +131,8 @@ export default function App() {
   const [hasSearched, setHasSearched] = useState(false);
   const debounceRef = useRef(null);
   const abortRef = useRef(null);
+  const inputRef = useRef(null);
+  const audioRef = useRef(null);
 
   const runSearch = useCallback(async (q) => {
     const trimmed = q.trim();
@@ -192,6 +203,38 @@ export default function App() {
     return () => clearTimeout(debounceRef.current);
   }, [query, runSearch]);
 
+  const handleClear = useCallback(() => {
+    setQuery('');
+    inputRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    const audio = new Audio('/lagu.mp3');
+    audio.loop = true;
+    audio.preload = 'auto';
+    audioRef.current = audio;
+
+    const startPlayback = () => {
+      audio.play().then(() => {
+        window.removeEventListener('click', startPlayback);
+        window.removeEventListener('keydown', startPlayback);
+        window.removeEventListener('touchstart', startPlayback);
+      }).catch(() => {});
+    };
+
+    window.addEventListener('click', startPlayback);
+    window.addEventListener('keydown', startPlayback);
+    window.addEventListener('touchstart', startPlayback);
+
+    return () => {
+      window.removeEventListener('click', startPlayback);
+      window.removeEventListener('keydown', startPlayback);
+      window.removeEventListener('touchstart', startPlayback);
+      audio.pause();
+      audio.src = '';
+    };
+  }, []);
+
   return (
     <div style={styles.page}>
       <header style={styles.header}>
@@ -220,6 +263,7 @@ export default function App() {
                 <SearchGlyph />
               </span>
               <input
+                ref={inputRef}
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -227,6 +271,16 @@ export default function App() {
                 style={styles.searchInput}
                 aria-label="Cari snippet"
               />
+              {query.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  style={styles.clearButton}
+                  aria-label="Hapus query"
+                >
+                  <ClearGlyph />
+                </button>
+              )}
             </div>
           </div>
         </section>
@@ -364,8 +418,23 @@ const styles = {
     color: 'var(--white)',
     fontFamily: 'var(--font-family)',
     fontSize: 15,
-    padding: '14px 16px 14px 46px',
+    padding: '14px 44px 14px 46px',
     outline: 'none',
+  },
+  clearButton: {
+    position: 'absolute',
+    right: 12,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 26,
+    height: 26,
+    background: 'transparent',
+    border: 'none',
+    borderRadius: 4,
+    color: 'var(--light-text)',
+    cursor: 'pointer',
+    padding: 0,
   },
   statusText: {
     color: 'var(--light-text)',
