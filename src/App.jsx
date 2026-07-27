@@ -279,6 +279,12 @@ export default function App() {
               )}
             </div>
           </div>
+
+          {status === 'success' && results.length > 0 && (
+            <p style={styles.resultCount}>
+              Ketemu <span style={styles.resultCountNumber}>{results.length}</span> script buat "{query}"
+            </p>
+          )}
         </section>
 
         <div style={{ margin: '28px 0' }}>
@@ -439,6 +445,15 @@ const styles = {
     color: 'var(--light-text)',
     cursor: 'pointer',
     padding: 0,
+  },
+  resultCount: {
+    margin: '14px 0 0',
+    fontSize: 13,
+    color: 'var(--light-text)',
+  },
+  resultCountNumber: {
+    color: 'var(--gold-text)',
+    fontWeight: 700,
   },
   statusText: {
     color: 'var(--light-text)',
